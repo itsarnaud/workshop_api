@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String     @id @default(uuid())
+  username   String
+  email      String     @unique
+  password   String
+  created_at DateTime   @default(now())
+  games      Game[]
+}
+
+model Game {
+  id          String  @id @default(uuid())
+  user_id     String
+  created_at  DateTime @default(now())
+  guests      Guest[]
+  invitations Invitation[]
+
+  user        User     @relation(fields: [user_id], references: [id])
+}
+
+model Guest {
+  id        String   @id @default(uuid())
+  username  String
+  joined_at DateTime @default(now())
+  game_id   String
+
+  game      Game     @relation(fields: [game_id], references: [id])
+
+  @@unique([game_id, username])
+}
+
+model Invitation {
+  id         String   @id @default(uuid())
+  token      String   @default(uuid()) @unique
+  created_at DateTime @default(now())
+  expires_at DateTime
+  game_id    String
+
+  game       Game     @relation(fields: [game_id], references: [id])
+}
+
