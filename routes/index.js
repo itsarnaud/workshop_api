@@ -1,9 +1,14 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router  = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+const users       = require('./users');
+const games       = require('./games');
+const invitations = require('./invitations');
+const guests      = require('./guests');
+
+router.use('/users',       users);
+router.use('/games',       games);
+router.use('/invitations', invitations);
+router.use('/guests',      guests);
 
 module.exports = router;
