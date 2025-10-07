@@ -1,5 +1,6 @@
 const bcrypt     = require('bcrypt');
 const { prisma } = require('../db/prisma');
+const jwt        = require('jsonwebtoken');
 
 const safeUserSelect = {
   id: true,
@@ -27,7 +28,7 @@ module.exports.create = async (req, res) => {
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(409).json({ error: 'Utilisateur déjà existant.' });
+      return res.status(409).json({ error: 'Cet email est déjà utilisé.' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -45,7 +46,7 @@ module.exports.create = async (req, res) => {
 module.exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'L\'email et le mot de passe requis.' });
+    if (!email || !password) return res.status(400).json({ error: 'L\'email et le mot de passe sont requis.' });
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -57,9 +58,8 @@ module.exports.login = async (req, res) => {
       return res.status(401).json({ error: 'Identifiant ou mot de passe incorrect.' });
     }
 
-    // TODO: créer une session / JWT
-    const safe = await prisma.user.findUnique({ where: { id: user.id }, select: safeUserSelect });
-    return res.json(safe);
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    return res.json({ token });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erreur lors de l\'authentification.' });
@@ -79,9 +79,7 @@ module.exports.show = async (req, res) => {
 
 module.exports.update = async (req, res) => {
   try {
-    // TODO: vérifier la session / autorisations
     const data = { ...req.body };
-    // Empêcher la mise à jour du mot de passe sans passer par un endpoint dédié
     if (data.password) delete data.password;
 
     const user = await prisma.user.update({ where: { id: req.params.id }, data });
