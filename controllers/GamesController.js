@@ -1,8 +1,12 @@
 const { prisma } = require('../db/prisma');
+const jwt = require('jsonwebtoken');
 
 module.exports.index = async (req, res) => {
   try {
-    const games = await prisma.game.findMany({ include: { guests: true, invitations: true } });
+    const user = res.locals.user;
+    if (!user) return res.status(401).json({ error: 'Non authentifié.' });
+
+    const games = await prisma.game.findMany({ where: { user_id: user.id }, include: { guests: true, invitations: true } });
     return res.json(games);
   } catch (err) {
     console.error(err);
@@ -12,10 +16,10 @@ module.exports.index = async (req, res) => {
 
 module.exports.create = async (req, res) => {
   try {
-    const { user_id } = req.body;
-    if (!user_id) return res.status(400).json({ error: 'user_id requis.' });
+    const user = res.locals.user;
+    if (!user) return res.status(401).json({ error: 'Non authentifié.' });
 
-    const created = await prisma.game.create({ data: req.body });
+    const created = await prisma.game.create({ data: { user_id: user.id } });
     return res.status(201).json(created);
   } catch (err) {
     console.error(err);

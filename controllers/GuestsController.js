@@ -15,7 +15,6 @@ module.exports.create = async (req, res) => {
     const { username, game_id } = req.body;
     if (!username || !game_id) return res.status(400).json({ error: 'username et game_id requis.' });
 
-    // Prisma constraint unique will throw if duplicate username in same game
     const created = await prisma.guest.create({ data: req.body });
     return res.status(201).json(created);
   } catch (err) {

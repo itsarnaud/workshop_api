@@ -5,6 +5,7 @@ const createError  = require('http-errors');
 const cors         = require('cors')
 
 const router = require('./routes/index');
+const authMiddleware = require('./middlewares/auth');
 
 const app = express();
 
@@ -22,6 +23,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+app.use(authMiddleware);
 
 app.use('/api', router);
 

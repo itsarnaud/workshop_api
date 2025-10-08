@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('workshop-api:server');
 var http = require('http');
+const { Server } = require('socket.io');
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,35 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+// socket.io config
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST']
+  }
+})
+
+const socketHelper = require('../socket');
+socketHelper.init(io);
+
+
+io.on('connection', (socket) => {
+  console.log('Socket connected:', socket.id);
+
+  socket.on('joinGame', ({ gameId, role }) => {
+    if (!gameId) return;
+    const room = `game_${gameId}`;
+    socket.join(room);
+    socket.to(room).emit('room:info', { message: `${role || 'player'} joined` });
+  });
+
+  socket.on('startGame', ({ gameId }) => {
+    if (!gameId) return;
+    const room = `game_${gameId}`;
+    io.to(room).emit('game:started', { gameId });
+  });
+});
 
 /**
  * Listen on provided port, on all network interfaces.
