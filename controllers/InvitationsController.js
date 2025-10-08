@@ -52,8 +52,11 @@ module.exports.join = async (req, res) => {
     const expires = new Date() > invitation.expires_at;
     if (expires) return res.status(400).json({ error: 'Invitation expirée.' });
 
-    const guest = await prisma.guest.create({ data: { username, game_id: invitation.game_id } });
-    const guest_token = jwt.sign({ guest_id: guest.id, username }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    const game = await prisma.game.findUnique({ where: { id: invitation.game_id }, include: { guests: true } });
+    if (game.guests.length) return res.status(400).json({ error: 'Il ne peux pas avoir plus de deux utilisateurs dans une partie.' })
+
+    const guest = await prisma.guest.create({ data: { username, game_id: game.id } });
+    const guest_token = jwt.sign({ guest_id: guest.id, username, role: 'guest' }, process.env.JWT_SECRET, { expiresIn: '2h' });
 
     try {
       const socketHelper = require('../socket');
@@ -64,7 +67,7 @@ module.exports.join = async (req, res) => {
       console.warn('Socket emit failed:', err.message);
     }
 
-  return res.json({ token: guest_token, game_id: invitation.game_id });
+    return res.json({ token: guest_token, game_id: invitation.game_id });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erreur interne.' })

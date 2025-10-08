@@ -17,10 +17,10 @@ module.exports = async function authMiddleware(req, res, next) {
       return next();
     }
 
-    const email = payload && payload.email;
-    if (!email) return next();
+    const user_id = payload && payload.user_id;
+    if (!user_id) return next();
 
-    const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, username: true } });
+    const user = await prisma.user.findUnique({ where: { id: user_id }, select: { id: true, email: true, username: true } });
     if (!user) return next();
 
     res.locals.user = user;
