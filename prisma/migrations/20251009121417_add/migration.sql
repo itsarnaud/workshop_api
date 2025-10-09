@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Game` ADD COLUMN `game_over` BOOLEAN NOT NULL DEFAULT false,
+    MODIFY `time_left` INTEGER NOT NULL DEFAULT 2100;

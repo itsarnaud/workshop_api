@@ -3,9 +3,10 @@ const router  = express.Router()
 
 const GamesController = require('../controllers/GamesController')
 
-router.get ('/',    GamesController.index);
-router.post('/',    GamesController.create);
-router.get ('/:id', GamesController.show);
-router.put ('/:id', GamesController.update);
+router.get  ('/',    GamesController.index);
+router.post ('/',    GamesController.create);
+router.get  ('/:id', GamesController.show);
+router.put  ('/:id', GamesController.update);
+router.patch('/:id/time', GamesController.setTime);
 
 module.exports = router

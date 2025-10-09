@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Game` ADD COLUMN `time_left` INTEGER NOT NULL DEFAULT 0;

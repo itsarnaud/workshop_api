@@ -56,7 +56,7 @@ module.exports.join = async (req, res) => {
     if (game.guests.length) return res.status(400).json({ error: 'Il ne peux pas avoir plus de deux utilisateurs dans une partie.' })
 
     const guest = await prisma.guest.create({ data: { username, game_id: game.id } });
-    const guest_token = jwt.sign({ guest_id: guest.id, username, role: 'guest' }, process.env.JWT_SECRET, { expiresIn: '2h' });
+    const guest_token = jwt.sign({ guest_id: guest.id, username, role: 'guest' }, process.env.JWT_SECRET, { expiresIn: '1y' });
 
     try {
       const socketHelper = require('../socket');

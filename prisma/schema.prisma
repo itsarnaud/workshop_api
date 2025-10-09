@@ -18,11 +18,14 @@ model User {
 }
 
 model Game {
-  id          String  @id @default(uuid())
-  user_id     String
-  created_at  DateTime @default(now())
-  guests      Guest[]
-  invitations Invitation[]
+  id              String  @id @default(uuid())
+  user_id         String
+  created_at      DateTime @default(now())
+  time_left       Int      @default(2100)
+  game_over       Boolean  @default(false)
+  guests          Guest[]
+  invitations     Invitation[]
+  Gamequestions   GameQuestion[]
 
   user        User     @relation(fields: [user_id], references: [id])
 }
@@ -48,3 +51,22 @@ model Invitation {
   game       Game     @relation(fields: [game_id], references: [id])
 }
 
+model Question {
+  id      Int     @id @default(autoincrement())
+  title   String  
+  enigma  String   @db.Text
+  answer  Json
+  hint    String?
+  digit   String
+
+  GameQuestions GameQuestion[]
+}
+
+model GameQuestion {
+  id          Int     @id @default(autoincrement())
+  game_id     String
+  question_id Int
+
+  game     Game       @relation(fields: [game_id],     references: [id])
+  question Question   @relation(fields: [question_id], references: [id])
+}
